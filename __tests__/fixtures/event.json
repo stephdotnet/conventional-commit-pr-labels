@@ -1,0 +1,15 @@
+{
+  "payload": {},
+  "eventName": "pull_request",
+  "sha": "4001daed79aed78bbe66e6be046b7570d9775d1d",
+  "ref": "refs/pull/%!f(<nil>)/merge",
+  "workflow": "test-action-locally.yml",
+  "action": "test-action",
+  "actor": "nektos/act",
+  "job": "test-action",
+  "runNumber": 1,
+  "runId": 1,
+  "apiUrl": "https://api.github.com",
+  "serverUrl": "https://github.com",
+  "graphqlUrl": "https://api.github.com/graphql"
+}
