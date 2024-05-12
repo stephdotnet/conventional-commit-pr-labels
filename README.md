@@ -25,6 +25,7 @@ name: conventional-release-labels
 jobs:
   label:
     permissions:
+      contents: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
