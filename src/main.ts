@@ -1,8 +1,9 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+
 import { getConfig } from './config'
 import { getConventionnalCommitInfo } from './utils/parser'
-import { getPullRequestInformations, syncPullRequestLabels } from './utils/api'
+import { init, getPullRequestInformations, syncPullRequestLabels } from './utils/api'
 
 /**
  * The main function for the action.
@@ -11,6 +12,8 @@ import { getPullRequestInformations, syncPullRequestLabels } from './utils/api'
 export async function run(): Promise<void> {
   try {
     const config = getConfig()
+    init(config)
+
     const eventName = github.context.eventName
     const repo = github.context.repo.repo
     const owner = github.context.repo.owner
@@ -59,6 +62,7 @@ export async function run(): Promise<void> {
       syncPullRequestLabels(repo, owner, prNumber, labelsToSync)
     }
   } catch (error) {
+    console.log(error)
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
   }

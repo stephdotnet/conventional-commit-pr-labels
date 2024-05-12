@@ -29298,6 +29298,7 @@ const api_1 = __nccwpck_require__(4385);
 async function run() {
     try {
         const config = (0, config_1.getConfig)();
+        (0, api_1.init)(config);
         const eventName = github.context.eventName;
         const repo = github.context.repo.repo;
         const owner = github.context.repo.owner;
@@ -29339,6 +29340,7 @@ async function run() {
         }
     }
     catch (error) {
+        console.log(error);
         // Fail the workflow run if an error occurs
         if (error instanceof Error)
             core.setFailed(error.message);
