@@ -23,10 +23,14 @@ on:
 
 name: conventional-release-labels
 jobs:
+  permissions:
+    pull-requests: write
   label:
     runs-on: ubuntu-latest
     steps:
       - uses: stephdotnet/conventional-commit-pr-labels@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 Create a `.github/release.yaml`:
