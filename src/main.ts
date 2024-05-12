@@ -46,6 +46,7 @@ export async function run(): Promise<void> {
 
     const labelsToSync = prLabels
       .filter(value => !Object.keys(config.labelsMap).some(input => input === value.name))
+      .filter(value => value.name !== config.breakingChangeLabel)
       .map(value => value.name)
 
     // Apply label to existing labels
@@ -62,7 +63,6 @@ export async function run(): Promise<void> {
       syncPullRequestLabels(repo, owner, prNumber, labelsToSync)
     }
   } catch (error) {
-    console.log(error)
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
   }

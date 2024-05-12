@@ -29,7 +29,7 @@ let errorMock: jest.SpiedFunction<typeof core.error>
 let infoMock: jest.SpiedFunction<typeof core.info>
 let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 
-describe('action', () => {
+describe('main action', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
@@ -137,6 +137,29 @@ describe('action', () => {
     getPullRequestInformationsMock.mockResolvedValue({
       title: 'test',
       labels: [getGithubLabel('test')]
+    })
+
+    getConventionnalCommitInfoMock.mockReturnValue({
+      type: 'feat',
+      isBreakingChange: false
+    })
+
+    await main.run()
+
+    expect(runMock).toHaveReturned()
+    expect(getPullRequestInformationsMock).toHaveBeenCalled()
+    expect(syncPullRequestLabelsMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.toIncludeAllMembers(['feature', 'test'])
+    )
+  })
+
+  it('Syncs breaking-change and not related labels', async () => {
+    getPullRequestInformationsMock.mockResolvedValue({
+      title: 'test',
+      labels: [getGithubLabel('fix'), getGithubLabel('breaking-change'), getGithubLabel('test')]
     })
 
     getConventionnalCommitInfoMock.mockReturnValue({
