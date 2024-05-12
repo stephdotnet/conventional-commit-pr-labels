@@ -9,10 +9,8 @@ export function getConventionnalCommitInfo(title: string): getConventionnalCommi
 
   const captureGroups = title.match(RegExp)
 
-  // console.log(captureGroups)
-
   return {
     type: captureGroups?.[1] || null,
-    isBreakingChange: captureGroups?.[3] === '!'
+    isBreakingChange: captureGroups?.[4] === '!'
   }
 }
