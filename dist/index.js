@@ -29425,10 +29425,9 @@ exports.getConventionnalCommitInfo = void 0;
 function getConventionnalCommitInfo(title) {
     const RegExp = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(([\w\-.]+))?(!)?: ([\w ])+([\s\S]*)/;
     const captureGroups = title.match(RegExp);
-    // console.log(captureGroups)
     return {
         type: captureGroups?.[1] || null,
-        isBreakingChange: captureGroups?.[3] === '!'
+        isBreakingChange: captureGroups?.[4] === '!'
     };
 }
 exports.getConventionnalCommitInfo = getConventionnalCommitInfo;
