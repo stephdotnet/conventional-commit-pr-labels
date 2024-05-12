@@ -29221,14 +29221,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getNumberFromValue = exports.getConfig = exports.ActionOutputs = void 0;
+exports.getNumberFromValue = exports.getConfig = exports.defaultBreakingChangeLabel = exports.defaultLabelsMap = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-var ActionOutputs;
-(function (ActionOutputs) {
-})(ActionOutputs || (exports.ActionOutputs = ActionOutputs = {}));
+exports.defaultLabelsMap = {
+    fix: ['fix', 'bugfix', 'perf', 'refactor', 'test', 'tests'],
+    feature: ['feat', 'feature']
+};
+exports.defaultBreakingChangeLabel = 'breaking-change';
 function getConfig() {
     return {
-        token: core.getInput('token', { required: true })
+        token: core.getInput('token', { required: true }),
+        labelsMap: core.getInput('labels_map') ? JSON.parse(core.getInput('labels_map')) : exports.defaultLabelsMap,
+        breakingChangeLabel: core.getInput('breaking_change_label') || exports.defaultBreakingChangeLabel
     };
 }
 exports.getConfig = getConfig;
@@ -29285,38 +29289,54 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const config_1 = __nccwpck_require__(6373);
+const parser_1 = __nccwpck_require__(7670);
+const api_1 = __nccwpck_require__(4385);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        console.log('CONTEXT');
-        console.log(JSON.stringify(github.context));
-        const eventName = github.context.eventName || core.getInput('EVENT_NAME');
         const config = (0, config_1.getConfig)();
-        let prNumber;
+        const eventName = github.context.eventName;
+        const repo = github.context.repo.repo;
+        const owner = github.context.repo.owner;
+        let prNumber = undefined;
         // Is it a pull request
-        if (github.context.eventName === 'pull_request') {
-            // Get the title
-            prNumber =
-                github.context.payload.pull_request?.number ||
-                    (0, config_1.getNumberFromValue)(core.getInput('PR_NUMBER'));
+        if (eventName === 'pull_request') {
+            prNumber = github.context.payload.pull_request?.number;
             core.info(`The PR number is: ${prNumber}`);
         }
         else {
             core.error('This is not a pull request event');
             return;
         }
-        const octokit = github.getOctokit(config.token);
-        if (typeof prNumber !== 'undefined') {
-            // const prTitle = octokit.rest.pulls.get({
-            //   pull_number: prNumber
-            // })
+        if (prNumber === undefined) {
+            core.error('Could not find PR number');
+            return;
         }
-        // Extract the conventionnal commit
-        // Convert to label using map
-        // Apply label to PR
+        const { title: prTitle, labels: prLabels } = await (0, api_1.getPullRequestInformations)(repo, owner, prNumber);
+        const { type, isBreakingChange } = (0, parser_1.getConventionnalCommitInfo)(prTitle);
+        let label;
+        if (isBreakingChange) {
+            label = config.breakingChangeLabel;
+        }
+        else if (type) {
+            label = Object.entries(config.labelsMap).find(([_key, value]) => value.includes(type))?.[0];
+        }
+        const labelsToSync = prLabels
+            .filter(value => !Object.keys(config.labelsMap).some(input => input === value.name))
+            .map(value => value.name);
+        // Apply label to existing labels
+        if (label !== undefined && !prLabels.some(iteration => iteration.name === label)) {
+            labelsToSync.push(label);
+            core.info(`The label ${label} will be added`);
+        }
+        // Sync PR with labels
+        if (!labelsToSync.every(val => prLabels.map(value => value.name).includes(val))) {
+            core.info(`The labels ${labelsToSync.join(', ')} will be synced`);
+            (0, api_1.syncPullRequestLabels)(repo, owner, prNumber, labelsToSync);
+        }
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -29325,6 +29345,91 @@ async function run() {
     }
 }
 exports.run = run;
+
+
+/***/ }),
+
+/***/ 4385:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.syncPullRequestLabels = exports.getPullRequestInformations = exports.init = void 0;
+const GitHub = __importStar(__nccwpck_require__(5438));
+const config_1 = __nccwpck_require__(6373);
+let config;
+let octokit;
+function init(cfg) {
+    config = cfg || (0, config_1.getConfig)();
+    octokit = GitHub.getOctokit(config.token);
+}
+exports.init = init;
+async function getPullRequestInformations(repo, owner, pull_number) {
+    const response = await octokit.rest.pulls.get({
+        repo,
+        owner,
+        pull_number
+    });
+    return {
+        title: response.data.title,
+        labels: response.data.labels
+    };
+}
+exports.getPullRequestInformations = getPullRequestInformations;
+async function syncPullRequestLabels(repo, owner, pull_number, labelsToSync) {
+    octokit.rest.issues.setLabels({
+        owner,
+        repo,
+        issue_number: pull_number,
+        labels: labelsToSync
+    });
+}
+exports.syncPullRequestLabels = syncPullRequestLabels;
+
+
+/***/ }),
+
+/***/ 7670:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getConventionnalCommitInfo = void 0;
+function getConventionnalCommitInfo(title) {
+    const RegExp = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(([\w\-.]+))?(!)?: ([\w ])+([\s\S]*)/;
+    const captureGroups = title.match(RegExp);
+    // console.log(captureGroups)
+    return {
+        type: captureGroups?.[1] || null,
+        isBreakingChange: captureGroups?.[3] === '!'
+    };
+}
+exports.getConventionnalCommitInfo = getConventionnalCommitInfo;
 
 
 /***/ }),
