@@ -1,4 +1,4 @@
-import event from '../fixtures/event.json'
+import event from '../fixtures/event'
 
 export const defaultContext = {
   ...event,
