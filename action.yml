@@ -12,6 +12,10 @@ inputs:
   token:
     description: 'Github token'
     required: true
+  labels_map:
+    description: 'Replaces the default labelsMap'
+  breaking_change_label:
+    description: 'Defines the default label name for breaking changes'
 
 runs:
   using: node20

@@ -6,13 +6,22 @@ import * as core from '@actions/core'
 export interface ActionConfig {
   // GitHub API token for making requests.
   token: string
+  labelsMap: object
+  breakingChangeLabel: string
 }
 
-export enum ActionOutputs {}
+export const defaultLabelsMap = {
+  fix: ['fix', 'bugfix', 'perf', 'refactor', 'test', 'tests'],
+  feature: ['feat', 'feature']
+}
+
+export const defaultBreakingChangeLabel = 'breaking-change'
 
 export function getConfig(): ActionConfig {
   return {
-    token: core.getInput('token', { required: true })
+    token: core.getInput('token', { required: true }),
+    labelsMap: core.getInput('labels_map') ? JSON.parse(core.getInput('labels_map')) : defaultLabelsMap,
+    breakingChangeLabel: core.getInput('breaking_change_label') || defaultBreakingChangeLabel
   }
 }
 

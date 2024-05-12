@@ -5,8 +5,7 @@
 [![CodeQL](https://github.com/stephdotnet/conventional-commit-pr-labels/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/stephdotnet/conventional-commit-pr-labels/actions/workflows/codeql-analysis.yml)
 [![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
-This repo is based on this un maintained action :
-https://github.dev/bcoe/conventional-release-labels
+This repo is based on this un maintained action : https://github.dev/bcoe/conventional-release-labels
 
 It leverages the github release summary automatic generation :
 https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes#about-automatically-generated-release-notes
@@ -53,6 +52,24 @@ changelog:
       labels:
         - '*'
 ```
+
+## Options
+
+- Label mapping can be set with the `label_mapping` option and is defined as follow:
+
+```
+{
+  'fix': ['fix', 'bugfix', 'perf', 'refactor','test', 'tests'],
+  'feature': ['feat', 'feature']
+}
+```
+
+- If a breaking change is detected the `breaking_change_label` will be applied instead of `fix` or `feature`
+
+## About
+
+This action uses this regex to identify the category and if the commit contains a Breaking change :
+https://gist.github.com/marcojahn/482410b728c31b221b70ea6d2c433f0c
 
 ## Contributing
 
