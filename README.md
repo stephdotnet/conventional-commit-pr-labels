@@ -23,9 +23,9 @@ on:
 
 name: conventional-release-labels
 jobs:
-  permissions:
-    pull-requests: write
   label:
+    permissions:
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: stephdotnet/conventional-commit-pr-labels@v1
