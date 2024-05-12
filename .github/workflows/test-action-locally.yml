@@ -1,0 +1,21 @@
+on:
+  pull_request:
+    types: [opened, edited]
+jobs:
+  test-action:
+    permissions:
+      contents: read
+      pull-requests: write
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
