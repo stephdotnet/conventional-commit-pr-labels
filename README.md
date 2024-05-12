@@ -18,7 +18,7 @@ Create a `.github/workflows/conventional-label.yaml`:
 # Warning, do not check out untrusted code with
 # the pull_request_target event.
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, edited]
 
 name: conventional-release-labels
