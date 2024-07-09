@@ -29221,7 +29221,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getNumberFromValue = exports.getConfig = exports.defaultBreakingChangeLabel = exports.defaultLabelsMap = void 0;
+exports.defaultBreakingChangeLabel = exports.defaultLabelsMap = void 0;
+exports.getConfig = getConfig;
+exports.getNumberFromValue = getNumberFromValue;
 const core = __importStar(__nccwpck_require__(2186));
 exports.defaultLabelsMap = {
     fix: ['fix', 'bugfix', 'perf', 'refactor', 'test', 'tests'],
@@ -29235,7 +29237,6 @@ function getConfig() {
         breakingChangeLabel: core.getInput('breaking_change_label') || exports.defaultBreakingChangeLabel
     };
 }
-exports.getConfig = getConfig;
 function getNumberFromValue(value) {
     if (value === '') {
         return undefined;
@@ -29251,7 +29252,6 @@ function getNumberFromValue(value) {
         throw new Error(`Unable to parse value: ${value}`);
     }
 }
-exports.getNumberFromValue = getNumberFromValue;
 
 
 /***/ }),
@@ -29285,7 +29285,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
+exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const config_1 = __nccwpck_require__(6373);
@@ -29346,7 +29346,6 @@ async function run() {
             core.setFailed(error.message);
     }
 }
-exports.run = run;
 
 
 /***/ }),
@@ -29380,7 +29379,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.syncPullRequestLabels = exports.getPullRequestInformations = exports.init = void 0;
+exports.init = init;
+exports.getPullRequestInformations = getPullRequestInformations;
+exports.syncPullRequestLabels = syncPullRequestLabels;
 const GitHub = __importStar(__nccwpck_require__(5438));
 const config_1 = __nccwpck_require__(6373);
 let config;
@@ -29389,7 +29390,6 @@ function init(cfg) {
     config = cfg || (0, config_1.getConfig)();
     octokit = GitHub.getOctokit(config.token);
 }
-exports.init = init;
 async function getPullRequestInformations(repo, owner, pull_number) {
     const response = await octokit.rest.pulls.get({
         repo,
@@ -29401,7 +29401,6 @@ async function getPullRequestInformations(repo, owner, pull_number) {
         labels: response.data.labels
     };
 }
-exports.getPullRequestInformations = getPullRequestInformations;
 async function syncPullRequestLabels(repo, owner, pull_number, labelsToSync) {
     octokit.rest.issues.setLabels({
         owner,
@@ -29410,7 +29409,6 @@ async function syncPullRequestLabels(repo, owner, pull_number, labelsToSync) {
         labels: labelsToSync
     });
 }
-exports.syncPullRequestLabels = syncPullRequestLabels;
 
 
 /***/ }),
@@ -29421,7 +29419,7 @@ exports.syncPullRequestLabels = syncPullRequestLabels;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getConventionnalCommitInfo = void 0;
+exports.getConventionnalCommitInfo = getConventionnalCommitInfo;
 function getConventionnalCommitInfo(title) {
     const RegExp = /^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(([\w\-.]+))?(!)?: ([\w ])+([\s\S]*)/;
     const captureGroups = title.match(RegExp);
@@ -29430,7 +29428,6 @@ function getConventionnalCommitInfo(title) {
         isBreakingChange: captureGroups?.[4] === '!'
     };
 }
-exports.getConventionnalCommitInfo = getConventionnalCommitInfo;
 
 
 /***/ }),
