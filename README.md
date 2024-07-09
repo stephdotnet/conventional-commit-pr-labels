@@ -15,8 +15,6 @@ https://docs.github.com/en/repositories/releasing-projects-on-github/automatical
 Create a `.github/workflows/conventional-label.yaml`:
 
 ```yaml
-# Warning, do not check out untrusted code with
-# the pull_request_target event.
 on:
   pull_request:
     types: [opened, edited]
